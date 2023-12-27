@@ -22,7 +22,7 @@ def save_calibration_parameters(filename, mtx, dist):
 # Main function
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python camera_calibration.py <folder_path>")
+        print("Usage: python monocular_calibration.py <folder_path>")
         sys.exit(1)
 
     folder_path = sys.argv[1]
