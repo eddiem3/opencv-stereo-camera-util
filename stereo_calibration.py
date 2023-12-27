@@ -20,6 +20,18 @@ class StereoCamera:
         right_images = [cv2.imread(file) for file in glob.glob(right_img_dir + '/*.jpg')]
         return left_images, right_images
 
+    def save_stereo_calibration_parameters(self, filename, R, T, R1, R2, P1, P2, Q):
+        file = cv2.FileStorage(filename, cv2.FILE_STORAGE_WRITE)
+        file.write("R", R)
+        file.write("T", T)
+        file.write("R1", R1)
+        file.write("R2", R2)
+        file.write("P1", P1)
+        file.write("P2", P2)
+        file.write("Q", Q)
+        file.release()
+    
+
     def find_matching_chessboard_corners(self, images_left, images_right):
         objp = np.zeros((self.chessboard_size[0] * self.chessboard_size[1], 3), np.float32)
         objp[:, :2] = np.mgrid[0:self.chessboard_size[0], 0:self.chessboard_size[1]].T.reshape(-1, 2)
@@ -112,6 +124,10 @@ image_size = left_images[0].shape[1], left_images[0].shape[0]
 objpoints, imgpoints_left, imgpoints_right = stereo_cam.find_matching_chessboard_corners(left_images, right_images)
 R, T = stereo_cam.stereo_calibration(objpoints, imgpoints_left, imgpoints_right, image_size)
 R1, R2, P1, P2, Q = stereo_cam.stereo_rectify(R, T, image_size)
+
+stereo_cam.save_stereo_calibration_parameters('stereo_calibration_params.yml', R, T, R1, R2, P1, P2, Q)
+
+
 map1_x, map1_y = cv2.initUndistortRectifyMap(stereo_cam.camera_matrix1, stereo_cam.dist_coeffs1, R1, P1, image_size, cv2.CV_32FC1)
 map2_x, map2_y = cv2.initUndistortRectifyMap(stereo_cam.camera_matrix2, stereo_cam.dist_coeffs2, R2, P2, image_size, cv2.CV_32FC1)
 stereo_cam.display_depth_map(map1_x, map1_y, map2_x, map2_y)
